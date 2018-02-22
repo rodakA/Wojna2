@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class GameMenager : MonoBehaviour {
 
-    //d
+    // nowa zmiana
 
     private int[] talia = new int [56];
     private int[] deck1 = new int[56];
