@@ -4,22 +4,22 @@ using UnityEngine;
 
 public class GameMenager : MonoBehaviour {
 
-    private int[] talia = new int [56];
+    private int[] MainDeck = new int [56];
     private int[] deck1 = new int[56];
     private int[] deck2 = new int[56];
 
     private int[] ddeck1 = new int[56];
     private int[] ddeck2 = new int[56];
 
-    private int[] bitwa1 = new int[16];
-    private int[] bitwa2 = new int[16];
+    private int[] battle1 = new int[16];
+    private int[] battle2 = new int[16];
 
     public int ID_CL1, ID_CL2;
     private int ID1, ID2;
-    private int pozycjaDeck1=0,pozycjaDeck2=0, pozUzepelniajaca1, pozUzepelniajaca2;
-    private float warstwy=0.0f;
-    public bool koniec = false;
-    private bool boolKarta1= true, boolKarta2 = true, LEWAwyg=false, PRAWAwyg=false, zdolnosc=false;
+    private int pozDeck1=0,pozDeck2=0, fillPoz1, fillPoz2;
+    private float layerToDysplay=0.0f;
+    public bool endGame = false;
+    private bool boolCard1= true, boolCard2 = true, LEFT_win=false, RIGHT_win=false, ability=false;
 
     public GameObject card;
     public GameObject card2;
@@ -32,9 +32,9 @@ public class GameMenager : MonoBehaviour {
 
     void Start ()
     {
-        TworzenieKart();
-        Rozdawanie();
-        PokaTablice();
+        CreateDeck();
+        DealingCards();
+        ShowTables();
 	}
 	
 	void Update ()
@@ -46,66 +46,66 @@ public class GameMenager : MonoBehaviour {
 
             //deck1[2] = 2;
             //deck2[2] = 16;
-            PokaTablice();
+            ShowTables();
         }
 
         if (Input.GetKeyDown(KeyCode.I))
         {
-            PokaTablice();
+            ShowTables();
         }
 
         // Wystaw karty
-        if (Input.GetKeyDown(KeyCode.T) && koniec == false)
+        if (Input.GetKeyDown(KeyCode.T) && endGame == false)
         {
-            warstwy = 0.0f;
-            DodajKarte();
-            StartCoroutine(ZdolnosciKart());
+            layerToDysplay = 0.0f;
+            AddCard();
+            StartCoroutine(CardAbility());
         }
         //Szybka Gra
-        if (Input.GetKey(KeyCode.G) && koniec == false)
+        if (Input.GetKey(KeyCode.G) && endGame == false)
         {
-            warstwy = 0.0f;
-            DodajKarte();
-            StartCoroutine(ZdolnosciKart());
+            layerToDysplay = 0.0f;
+            AddCard();
+            StartCoroutine(CardAbility());
         }
     }
      
-    void TworzenieKart ()
+    void CreateDeck ()
     {
         for(int i = 0; i <56; i++)
         {
-            talia[i] = i+1;
+            MainDeck[i] = i+1;
         }
 
     }
     
-    void Rozdawanie ()
+    void DealingCards ()
     {
         int ran,a=0,b=56;
         int i = 1, z = 0, x = 0;
-        bool zmiana = true;
+        bool switcher = true;
         while(i<56)
         {
             ran = Random.Range(a,b);
             if (ran == a) a++;
             if (ran == b) b--;
             
-            if (talia[ran] != 0)
+            if (MainDeck[ran] != 0)
             {
-                if(zmiana)
+                if(switcher)
                 {
-                    deck1[z] = talia[ran];
-                    zmiana = false;
+                    deck1[z] = MainDeck[ran];
+                    switcher = false;
                     z++;
                 }
                 else
                 {
-                    deck2[x] = talia[ran];
-                    zmiana = true;
+                    deck2[x] = MainDeck[ran];
+                    switcher = true;
                     x++;
                 }
 
-                talia[ran] = 0;
+                MainDeck[ran] = 0;
                 
             }
             else continue;
@@ -113,92 +113,92 @@ public class GameMenager : MonoBehaviour {
         }
     }
 
-    void DodajKarte ()
+    void AddCard ()
     {
         int i=0, j=0;
 
-        if(boolKarta1) //dokładanie z deck1
+        if(boolCard1) //dokładanie z deck1
         {
-            ID_CL1 = deck1[pozycjaDeck1];
+            ID_CL1 = deck1[pozDeck1];
 
-            Vspawn1 = new Vector3(spawn1.position.x + warstwy * 1.3f, spawn1.position.y, spawn1.position.z - warstwy);
+            Vspawn1 = new Vector3(spawn1.position.x + layerToDysplay * 1.3f, spawn1.position.y, spawn1.position.z - layerToDysplay);
             Instantiate(card, Vspawn1, Quaternion.Euler(0, 0, 0));
 
-            while(bitwa1[i] != 0)
+            while(battle1[i] != 0)
             i++;
 
-            bitwa1[i] = deck1[pozycjaDeck1];
-            deck1[pozycjaDeck1] = 0;
+            battle1[i] = deck1[pozDeck1];
+            deck1[pozDeck1] = 0;
 
-            pozycjaDeck1++;
-            boolKarta1 = false;
+            pozDeck1++;
+            boolCard1 = false;
         }
 
-        if(boolKarta2) // dokladanie z deck2
+        if(boolCard2) // dokladanie z deck2
         {
-            ID_CL2 = deck2[pozycjaDeck2];
+            ID_CL2 = deck2[pozDeck2];
 
-            Vspawn2 = new Vector3(spawn2.position.x + warstwy * 1.3f, spawn2.position.y, spawn2.position.z - warstwy);
+            Vspawn2 = new Vector3(spawn2.position.x + layerToDysplay * 1.3f, spawn2.position.y, spawn2.position.z - layerToDysplay);
             Instantiate(card2, Vspawn2, Quaternion.Euler(0, 0, 0));
 
-            while(bitwa2[j] != 0)
+            while(battle2[j] != 0)
             j++;
 
-            bitwa2[j] = deck2[pozycjaDeck2];
-            deck2[pozycjaDeck2] = 0;
+            battle2[j] = deck2[pozDeck2];
+            deck2[pozDeck2] = 0;
 
-            pozycjaDeck2++;
-            boolKarta2 = false;
+            pozDeck2++;
+            boolCard2 = false;
         }
     }
 
-    void DodajDoLupu()
+    void AddToLoot()
     {
         int i = 0,j=0;
 
         // karta z deck1 do lupu
-        ID_CL1 = deck1[pozycjaDeck1];
+        ID_CL1 = deck1[pozDeck1];
 
-        Vspawn1 = new Vector3(spawn1.position.x + warstwy * 1.3f, spawn1.position.y - 1.3f, spawn1.position.z - warstwy);
+        Vspawn1 = new Vector3(spawn1.position.x + layerToDysplay * 1.3f, spawn1.position.y - 1.3f, spawn1.position.z - layerToDysplay);
         Instantiate(card, Vspawn1, Quaternion.Euler(0, 0, -90));
 
-         while (talia[i] != 0)
+         while (MainDeck[i] != 0)
                 i++;
 
-        talia[i] = deck1[pozycjaDeck1];
-        deck1[pozycjaDeck1] = 0;
+        MainDeck[i] = deck1[pozDeck1];
+        deck1[pozDeck1] = 0;
 
-        pozycjaDeck1++;
+        pozDeck1++;
 
 
         i++;
         // karty z Bitwa1 do lupu
-        while(bitwa1[j] != 0)
+        while(battle1[j] != 0)
         {
-            talia[i] = bitwa1[j];
-            bitwa1[j] = 0;
+            MainDeck[i] = battle1[j];
+            battle1[j] = 0;
             i++;
             j++;
         }
 
 
-        // karta z deck2 do 
-        ID_CL2 = deck2[pozycjaDeck2];
+        // karta z deck2 do lupu
+        ID_CL2 = deck2[pozDeck2];
 
-        Vspawn2 = new Vector3(spawn2.position.x + warstwy * 1.3f, spawn2.position.y - 1.3f, spawn2.position.z - warstwy);
+        Vspawn2 = new Vector3(spawn2.position.x + layerToDysplay * 1.3f, spawn2.position.y - 1.3f, spawn2.position.z - layerToDysplay);
         Instantiate(card2, Vspawn2, Quaternion.Euler(0, 0, -90));
 
-        talia[i] = deck2[pozycjaDeck2];
-        deck2[pozycjaDeck2] = 0;
+        MainDeck[i] = deck2[pozDeck2];
+        deck2[pozDeck2] = 0;
 
-        pozycjaDeck2++;
+        pozDeck2++;
 
         
         i++;
-        while (bitwa2[j] != 0)
+        while (battle2[j] != 0)
         {
-            talia[i] = bitwa2[j];
-            bitwa2[j] = 0;
+            MainDeck[i] = battle2[j];
+            battle2[j] = 0;
             i++;
             j++;
         }
@@ -206,78 +206,78 @@ public class GameMenager : MonoBehaviour {
     }
 
     // Sprawdza czy kary sie skończyly
-    void Sprawdzanie()
+    void Checking()
     {
-        if (deck1[pozycjaDeck1] == 0)
+        if (deck1[pozDeck1] == 0)
         {
             if (ddeck1[0] == 0)
             {
                 Debug.Log("KONIEC deck2(prawa) wygral");
-                koniec = true;
+                endGame = true;
             }
             //zamiana d1 <== dd1
-            for(int i = 0; i < pozUzepelniajaca1; i++)
+            for(int i = 0; i < fillPoz1; i++)
             {
                 deck1[i] = ddeck1[i];
                 ddeck1[i] = 0;
             }
-            pozycjaDeck1 = 0;
-            pozUzepelniajaca1 = 0;
+            pozDeck1 = 0;
+            fillPoz1 = 0;
         }
 
-        if (deck2[pozycjaDeck2] == 0)
+        if (deck2[pozDeck2] == 0)
         {
             if (ddeck2[0] == 0)
             {
                 Debug.Log("KONIEC deck1(lewa) wygral");
-                koniec = true;
+                endGame = true;
             }
             //zamiana d2 <== dd2
-            for (int i = 0; i < pozUzepelniajaca2; i++)
+            for (int i = 0; i < fillPoz2; i++)
             {
                 deck2[i] = ddeck2[i];
                 ddeck2[i] = 0;
             }
-            pozycjaDeck2 = 0;
-            pozUzepelniajaca2 = 0;
+            pozDeck2 = 0;
+            fillPoz2 = 0;
         }
 
     }
 
-    IEnumerator ZdolnosciKart()
+    IEnumerator CardAbility()
     {
         yield return new WaitForFixedUpdate();
 
         int i=0;
-        bool bez1=false, bez2=false;
+        bool beige1=false, beige2=false;
 
 
-        warstwy += 1;
+        layerToDysplay += 1;
 
-        while (bitwa1[i] != 0)
+        while (battle1[i] != 0)
         {
             // dla 2
-            if (bitwa1[i] == 2 || bitwa1[i] == 16 || bitwa1[i] == 30 || bitwa1[i] == 44)
+            if (battle1[i] == 2 || battle1[i] == 16 || battle1[i] == 30 || battle1[i] == 44)
             {
-                bez1 = false;
-                boolKarta1 = true;
-                DodajKarte();
+                beige1 = false;
+                boolCard1 = true;
+                AddCard();
             }
 
             // dla Jopka
-            if (bitwa1[i] == 11 || bitwa1[i] == 25 || bitwa1[i] == 39 || bitwa1[i] == 53)
+            if (battle1[i] == 11 || battle1[i] == 25 || battle1[i] == 39 || battle1[i] == 53)
             {
-                bez1 = false;
-                boolKarta2 = true;
-                DodajKarte();
+                beige1 = false;
+                boolCard2 = true;
+                AddCard();
             }
             
             //dla Dama Wino
-            if(bitwa1[i]== 54)
+            if(battle1[i]== 54)
             {
-                bez1 = true;
-                PRAWAwyg = true;
-                LEWAwyg = false;
+                beige1 = true;
+                RIGHT_win = true;
+                LEFT_win = false;
             }
 
             i++;
@@ -285,157 +285,155 @@ public class GameMenager : MonoBehaviour {
 
         i = 0;
         yield return new WaitForFixedUpdate();
-        while (bitwa2[i] != 0)
+        while (battle2[i] != 0)
         {
-
-
             // dla 2
-            if (bitwa2[i] == 2 || bitwa2[i] == 16 || bitwa2[i] == 30 || bitwa2[i] == 44)
+            if (battle2[i] == 2 || battle2[i] == 16 || battle2[i] == 30 || battle2[i] == 44)
             {
-                bez2 = false;
-                boolKarta2 = true;
-                DodajKarte();
+                beige2 = false;
+                boolCard2 = true;
+                AddCard();
             }
 
             // dla Jopka
-            if (bitwa2[i] == 11 || bitwa2[i] == 25 || bitwa2[i] == 39 || bitwa2[i] == 53)
+            if (battle2[i] == 11 || battle2[i] == 25 || battle2[i] == 39 || battle2[i] == 53)
             {
-                bez1 = false;
-                boolKarta1 = true;
-                DodajKarte();
+                beige1 = false;
+                boolCard1 = true;
+                AddCard();
             }
 
             //dla Dama Wino
-            if (bitwa2[i] == 54)
+            if (battle2[i] == 54)
             {
-                bez2 = true;
-                LEWAwyg = true;
-                PRAWAwyg = false;
+                beige2 = true;
+                LEFT_win = true;
+                RIGHT_win = false;
             }
 
             i++;
         }
 
         //Brak zdolnosci
-        if (bez1 == false && bez2 == false)
+        if (beige1 == false && beige2 == false)
         {
-            zdolnosc = false;
+            ability = false;
         }
-        else zdolnosc = true;
+        else ability = true;
 
-        Sprawdzanie();
-        Walka();
-        PokaTablice();
+        Checking();
+        Combat();
+        ShowTables();
 
     }
     
-    void Walka ()
+    void Combat ()
     {
         int maxD1=0, maxD2=0; //maxymalne wartosci kart na polu bitwy 
 
-        int pozBitwa1 = 0, pozBitwa2 = 0;
+        int pozBattle1 = 0, pozBattle2 = 0;
 
-        while (bitwa1[pozBitwa1] != 0)
+        while (battle1[pozBattle1] != 0)
         {
-            ID1 = bitwa1[pozBitwa1] % 14;
+            ID1 = battle1[pozBattle1] % 14;
             if (ID1 == 0) ID1 = 14;
 
             if (ID1 > maxD1) maxD1 = ID1;
-            pozBitwa1++;
+            pozBattle1++;
         }
 
-        while (bitwa2[pozBitwa2] != 0)
+        while (battle2[pozBattle2] != 0)
         {
-            ID2 = bitwa2[pozBitwa2] % 14;
+            ID2 = battle2[pozBattle2] % 14;
             if (ID2 == 0) ID2 = 14;
 
             if (ID2 > maxD2) maxD2 = ID2;
-            pozBitwa2++;
+            pozBattle2++;
         }
 
-        pozBitwa1 = 0;
-        pozBitwa2 = 0;
+        pozBattle1 = 0;
+        pozBattle2 = 0;
 
-        if(!zdolnosc)
+        if(!ability)
         {
             // dla 1
             if (maxD1 == 1 && maxD2 >= 10) maxD1 = 15;
             if (maxD2 == 1 && maxD2 >= 10) maxD2 = 15;
 
-            if (maxD1 > maxD2) LEWAwyg = true;
-            if (maxD1 < maxD2) PRAWAwyg = true;
+            if (maxD1 > maxD2) LEFT_win = true;
+            if (maxD1 < maxD2) RIGHT_win = true;
         }
 
 
 
         // LEWA wygrywa
-        if (LEWAwyg == true && PRAWAwyg == false)  
+        if (LEFT_win == true && RIGHT_win == false)  
         {   
             Debug.Log("Lewa wygrala");
 
             // dodaj swoje
-            while (bitwa1[pozBitwa1] != 0)
+            while (battle1[pozBattle1] != 0)
             {
-                ddeck1[pozUzepelniajaca1] = bitwa1[pozBitwa1];
-                pozUzepelniajaca1++;
+                ddeck1[fillPoz1] = battle1[pozBattle1];
+                fillPoz1++;
 
-                bitwa1[pozBitwa1] = 0; // zeruj swoje
-                pozBitwa1++;
+                battle1[pozBattle1] = 0; // zeruj swoje
+                pozBattle1++;
             }
 
             // dodaj przeciwnika
-            while (bitwa2[pozBitwa2] != 0)
+            while (battle2[pozBattle2] != 0)
             {
-                ddeck1[pozUzepelniajaca1] = bitwa2[pozBitwa2];
-                pozUzepelniajaca1++;
+                ddeck1[fillPoz1] = battle2[pozBattle2];
+                fillPoz1++;
 
-                bitwa2[pozBitwa2] = 0; // zeruj przeciwnika
-                pozBitwa2++;
+                battle2[pozBattle2] = 0; // zeruj przeciwnika
+                pozBattle2++;
             }
 
             // dodaj lupy
             int i=0;
-            while(talia[i] != 0)
+            while(MainDeck[i] != 0)
             {
-                ddeck1[pozUzepelniajaca1] = talia[i];
-                pozUzepelniajaca1++;
-                talia[i] = 0;
+                ddeck1[fillPoz1] = MainDeck[i];
+                fillPoz1++;
+                MainDeck[i] = 0;
                 i++;
             }
 
         }
         // PRAWA wygrywa
-        else if (LEWAwyg == false && PRAWAwyg == true)  
+        else if (LEFT_win == false && RIGHT_win == true)  
         {
             Debug.Log("Prawa wygrala");
 
             // dodaj swoje
-            while(bitwa2[pozBitwa2] != 0)
+            while(battle2[pozBattle2] != 0)
             {
-                ddeck2[pozUzepelniajaca2] = bitwa2[pozBitwa2];
-                pozUzepelniajaca2++;
+                ddeck2[fillPoz2] = battle2[pozBattle2];
+                fillPoz2++;
 
-                bitwa2[pozBitwa2] = 0; // zeruj swoje
-                pozBitwa2++;
+                battle2[pozBattle2] = 0; // zeruj swoje
+                pozBattle2++;
             }
 
             // dodaj przeciwnika
-            while (bitwa1[pozBitwa1] != 0)
+            while (battle1[pozBattle1] != 0)
             {
-                ddeck2[pozUzepelniajaca2] = bitwa1[pozBitwa1];
-                pozUzepelniajaca2++;
+                ddeck2[fillPoz2] = battle1[pozBattle1];
+                fillPoz2++;
 
-                bitwa1[pozBitwa1] = 0; // zeruj przeciwika
-                pozBitwa1++;
+                battle1[pozBattle1] = 0; // zeruj przeciwika
+                pozBattle1++;
             }
 
             // dodaj lupy
             int i = 0;
-            while (talia[i] != 0)
+            while (MainDeck[i] != 0)
             {
-                ddeck2[pozUzepelniajaca2] = talia[i];
-                pozUzepelniajaca2++;
-                talia[i] = 0;
+                ddeck2[fillPoz2] = MainDeck[i];
+                fillPoz2++;
+                MainDeck[i] = 0;
                 i++;
             }
 
@@ -445,36 +443,38 @@ public class GameMenager : MonoBehaviour {
         else
         {   
             Debug.Log("WOJNA!!!");
-            StartCoroutine(Wojna());
+            StartCoroutine(War());
         }
 
-        boolKarta1 = true;
-        boolKarta2 = true;
-        LEWAwyg = false;
-        PRAWAwyg = false;
+        boolCard1 = true;
+        boolCard2 = true;
+        LEFT_win = false;
+        RIGHT_win = false;
     }
 
-    IEnumerator Wojna()
+    IEnumerator War()
     {
-        Sprawdzanie();
+        Checking();
         yield return new WaitForFixedUpdate();
 
-        warstwy += 0.3f;
-        DodajDoLupu();
-        Sprawdzanie();
+        layerToDysplay += 0.3f;
+        AddToLoot();
+        Checking();
 
         yield return new WaitForFixedUpdate();
-        warstwy += 0.3f;
-        boolKarta1 = true;
-        boolKarta2 = true;
+        layerToDysplay += 0.3f;
+        boolCard1 = true;
+        boolCard2 = true;
 
-        DodajKarte();
+        AddCard();
 
-        Walka();
+        Combat();
 
     }
 
-    public void PokaTablice ()
+    //tego nie będzie w finalnej wersji
+    //jest to tylko ułatwienie wyświetlające co jest w tablicach
+    public void ShowTables ()
     {
         tab1.text = null;
         tab2.text = null;
@@ -492,12 +492,12 @@ public class GameMenager : MonoBehaviour {
             tab2.text = tab2.text + " " + deck2[i];
             ttab2.text = ttab2.text + " " + ddeck2[i];
 
-            tali.text = tali.text + " " + talia[i];
+            tali.text = tali.text + " " + MainDeck[i];
 
             if(i < 16)
             {
-                bitwaNR1.text = bitwaNR1.text + " " + bitwa1[i];
-                bitwaNR2.text = bitwaNR2.text + " " + bitwa2[i];
+                bitwaNR1.text = bitwaNR1.text + " " + battle1[i];
+                bitwaNR2.text = bitwaNR2.text + " " + battle2[i];
             }
 
         }
